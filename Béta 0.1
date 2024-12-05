@@ -1,0 +1,74 @@
+import tkinter as tk
+
+class JeuClicker:
+    def __init__(self, langue="fr"):
+        self.version = "Béta 0.1"
+        self.points = 0
+        self.points_par_clic = 1
+        self.ameliorations = []
+        self.langue = langue
+        self.prix_ameliorations = [10, 25, 50, 100]
+        
+        self.fenetre = tk.Tk()
+        self.fenetre.title("Jeu Clicker")
+        self.fenetre.geometry("400x400")
+
+        self.score_label = tk.Label(self.fenetre, text=f"Points: {self.points}", font=("Arial", 14))
+        self.score_label.pack(pady=10)
+
+        self.clic_button = tk.Button(self.fenetre, text="Cliquer", command=self.incrementer_points, width=20, height=2)
+        self.clic_button.pack(pady=10)
+
+        self.version_label = tk.Label(self.fenetre, text=f"Version : {self.version}", font=("Arial", 10))
+        self.version_label.pack(side="bottom", pady=5, anchor="w", padx=10)  # Aligné à gauche et en bas
+
+        self.amelioration_label = tk.Label(self.fenetre, text="Améliorations disponibles :", font=("Arial", 12))
+        self.amelioration_label.pack(pady=10)
+
+        self.boutons_ameliorations = []
+        for i, prix in enumerate(self.prix_ameliorations):
+            bouton = tk.Button(self.fenetre, text=f"Amélioration {i + 1} - {prix} points", command=lambda i=i: self.acheter_amelioration(i), width=30, height=2, bg="#4CAF50", fg="white", font=("Arial", 12))
+            bouton.pack(pady=5)
+            self.boutons_ameliorations.append(bouton)
+
+        # Copyright en bas à gauche
+        self.copyright_label = tk.Label(self.fenetre, text="© Nathan Games", font=("Arial", 8), fg="gray")
+        self.copyright_label.place(x=10, y=380)  # Positionner en bas à gauche
+
+        self.fenetre.mainloop()
+
+    def incrementer_points(self):
+        self.points += self.points_par_clic
+        self.score_label.config(text=f"Points: {self.points}")
+
+    def acheter_amelioration(self, index):
+        prix = self.prix_ameliorations[index]
+        if self.points >= prix:
+            self.points -= prix
+            self.points_par_clic += 1  # Augmenter les points par clic
+            self.prix_ameliorations[index] = int(prix * 1.2)  # Augmenter le prix de l'amélioration
+            self.score_label.config(text=f"Points: {self.points}")
+            self.boutons_ameliorations[index].config(text=f"Amélioration {index + 1} - {self.prix_ameliorations[index]} points")
+        else:
+            print("Pas assez de points pour acheter cette amélioration !")
+
+# Demander la langue au démarrage
+def demarrer_jeu():
+    fenetre_langue = tk.Tk()
+    fenetre_langue.title("Choisir la langue")
+    fenetre_langue.geometry("300x200")
+    
+    def choisir_langue(langue):
+        jeu = JeuClicker(langue)
+        fenetre_langue.destroy()
+
+    bouton_fr = tk.Button(fenetre_langue, text="Français", command=lambda: choisir_langue("fr"), width=20, height=2)
+    bouton_fr.pack(pady=20)
+
+    bouton_en = tk.Button(fenetre_langue, text="English", command=lambda: choisir_langue("en"), width=20, height=2)
+    bouton_en.pack(pady=20)
+
+    fenetre_langue.mainloop()
+
+# Démarrer le jeu
+demarrer_jeu()
