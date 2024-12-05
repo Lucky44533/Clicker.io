@@ -1,0 +1,131 @@
+import tkinter as tk
+
+class JeuClicker:
+    def __init__(self, langue="fr"):
+        self.version = "Béta 0.2"
+        self.points = 0
+        self.points_par_clic = 1
+        self.points_par_seconde = 0
+        self.ameliorations = [0] * 10  # Nombre d'améliorations achetées pour chaque
+        self.langue = langue
+        self.prix_ameliorations = [10, 25, 50, 100, 200, 400, 800, 1600, 3200, 6400]  # 10 améliorations
+        self.max_ameliorations = 99  # Nombre maximal d'achats pour chaque amélioration
+
+        # Noms des améliorations
+        self.noms_ameliorations = [
+            "Amélioration de clic",
+            "Ouvriers supplémentaires",
+            "Exploitation minière",
+            "Usines automatiques",
+            "Investissements",
+            "Recrutement massif",
+            "Infrastructure avancée",
+            "Technologies de pointe",
+            "Automatisation totale",
+            "Supercalculateur"
+        ]
+        
+        # Fenêtre de jeu
+        self.fenetre = tk.Tk()
+        self.fenetre.title("Jeu Clicker")
+        self.fenetre.geometry("600x400")
+
+        # Frame pour organiser les widgets
+        self.frame_gauche = tk.Frame(self.fenetre)
+        self.frame_gauche.pack(side="left", padx=10)
+
+        self.frame_droite = tk.Frame(self.fenetre)
+        self.frame_droite.pack(side="right", padx=10)
+
+        # Labels
+        self.score_label = tk.Label(self.frame_gauche, text=f"Points: {self.points}", font=("Arial", 14))
+        self.score_label.pack(pady=10)
+
+        self.points_par_seconde_label = tk.Label(self.frame_gauche, text=f"Points/sec: {self.points_par_seconde}", font=("Arial", 12))
+        self.points_par_seconde_label.pack(pady=5)
+
+        self.version_label = tk.Label(self.frame_gauche, text=f"Version : {self.version}", font=("Arial", 10))
+        self.version_label.pack(side="bottom", pady=5)
+
+        # Bouton pour ajouter des points (au centre)
+        self.clic_button = tk.Button(self.fenetre, text="Cliquer", command=self.incrementer_points, width=20, height=2, bg="#4CAF50", fg="white", font=("Arial", 14))
+        self.clic_button.place(relx=0.5, rely=0.5, anchor="center")  # Centrer le bouton dans la fenêtre
+
+        # Liste des améliorations
+        self.amelioration_label = tk.Label(self.frame_droite, text="Améliorations disponibles :", font=("Arial", 12))
+        self.amelioration_label.pack(pady=10)
+
+        self.boutons_ameliorations = []
+        for i, prix in enumerate(self.prix_ameliorations):
+            bouton = tk.Button(self.frame_droite, text=f"{self.noms_ameliorations[i]} - {prix} points - {self.ameliorations[i]} acheté(s)", command=lambda i=i: self.acheter_amelioration(i), width=30, height=2, font=("Arial", 12))
+            bouton.pack(pady=5)
+            self.boutons_ameliorations.append(bouton)
+
+        # Copyright en bas à gauche
+        self.copyright_label = tk.Label(self.fenetre, text="© Nathan Games", font=("Arial", 8), fg="gray")
+        self.copyright_label.place(x=10, y=370)  # Positionner en bas à gauche
+
+        # Lancer le compteur de points par seconde
+        self.lancer_compteur_points_par_seconde()
+
+        self.fenetre.mainloop()
+
+    def incrementer_points(self):
+        self.points += self.points_par_clic
+        self.score_label.config(text=f"Points: {self.points}")
+
+    def acheter_amelioration(self, index):
+        prix = self.prix_ameliorations[index]
+        if self.ameliorations[index] < self.max_ameliorations:
+            if self.points >= prix:
+                self.points -= prix
+                self.ameliorations[index] += 1  # Acheter l'amélioration
+                self.points_par_clic += 1  # Augmenter les points par clic
+                self.points_par_seconde += 1  # Augmenter les points par seconde
+                self.prix_ameliorations[index] = int(prix * 1.2)  # Augmenter le prix de l'amélioration
+                self.score_label.config(text=f"Points: {self.points}")
+                self.points_par_seconde_label.config(text=f"Points/sec: {self.points_par_seconde}")
+                self.mettre_a_jour_boutons()
+        else:
+            print("Amélioration déjà au maximum (99 achats)!")
+
+    def mettre_a_jour_boutons(self):
+        for i, bouton in enumerate(self.boutons_ameliorations):
+            prix = self.prix_ameliorations[i]
+            if self.ameliorations[i] < self.max_ameliorations:  # Si l'amélioration n'est pas au max
+                if self.points >= prix:
+                    bouton.config(text=f"{self.noms_ameliorations[i]} - {prix} points - {self.ameliorations[i]} acheté(s)", bg="#4CAF50")
+                else:
+                    bouton.config(text=f"{self.noms_ameliorations[i]} - {prix} points - {self.ameliorations[i]} acheté(s)", bg="#F44336")
+            else:  # Si l'amélioration est au max
+                bouton.config(text=f"{self.noms_ameliorations[i]} - MAX - {self.ameliorations[i]} acheté(s)", bg="#9E9E9E")
+
+    def lancer_compteur_points_par_seconde(self):
+        """Méthode pour ajouter des points par seconde."""
+        self.points += self.points_par_seconde
+        self.score_label.config(text=f"Points: {self.points}")
+        self.points_par_seconde_label.config(text=f"Points/sec: {self.points_par_seconde}")
+        self.fenetre.after(1000, self.lancer_compteur_points_par_seconde)  # Appel tous les 1000ms (1 seconde)
+
+# Demander la langue au démarrage
+def demarrer_jeu():
+    fenetre_langue = tk.Tk()
+    fenetre_langue.title("Choisir la langue")
+    fenetre_langue.geometry("300x200")
+    
+    def choisir_langue(langue):
+        jeu = JeuClicker(langue)
+        fenetre_langue.destroy()
+
+    bouton_fr = tk.Button(fenetre_langue, text="Français", command=lambda: choisir_langue("fr"), width=20, height=2)
+    bouton_fr.pack(pady=20)
+
+    bouton_en = tk.Button(fenetre_langue, text="English", command=lambda: choisir_langue("en"), width=20, height=2)
+    bouton_en.pack(pady=20)
+
+    fenetre_langue.mainloop()
+
+# Démarrer le jeu
+demarrer_jeu()
+
+
